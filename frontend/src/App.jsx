@@ -1,18 +1,24 @@
-import { SignInButton } from '@clerk/clerk-react'
-import './App.css'
+import "./App.css";
+import { SignedIn, SignedOut, SignInButton, SignOutButton, UserButton } from "@clerk/clerk-react";
 
 function App() {
-
   return (
     <>
-    <div className="App">
-      <header className="App-header">
-        <h1>Welcome to Live Hire</h1>
-        <SignInButton mode='modal'/>
-      </header>
-    </div>
+      <h1>Welcome to the app</h1>
+
+      <SignedOut>
+        <SignInButton mode="modal">
+          <button>Login</button>
+        </SignInButton>
+      </SignedOut>
+
+      <SignedIn>
+        <SignOutButton />
+      </SignedIn>
+
+      <UserButton />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
