@@ -21,42 +21,57 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
       if (session.status === "completed") return;
 
       try {
-        const { token, userId, userName, userImage } = await sessionApi.getStreamToken();
+        // Get both video token and chat token
+        const videoTokenResponse = await sessionApi.getStreamToken();
+        const { token: chatToken, userId, userName, userImage } = videoTokenResponse;
 
+        // Initialize video client with proper token
         const client = await initializeStreamClient(
           {
             id: userId,
             name: userName,
             image: userImage,
           },
-          token
+          chatToken
         );
 
         setStreamClient(client);
 
         videoCall = client.call("default", session.callId);
+        
+        // Join with create option to ensure call is created if it doesn't exist
+        console.log("🎥 Joining video call:", session.callId);
         await videoCall.join({ create: true });
         setCall(videoCall);
+        console.log("✅ Successfully joined video call");
 
         const apiKey = import.meta.env.VITE_STREAM_API_KEY;
         chatClientInstance = StreamChat.getInstance(apiKey);
 
+        console.log("💬 Connecting to chat...");
         await chatClientInstance.connectUser(
           {
             id: userId,
             name: userName,
             image: userImage,
           },
-          token
+          chatToken
         );
         setChatClient(chatClientInstance);
+        console.log("✅ Chat connected successfully");
 
         const chatChannel = chatClientInstance.channel("messaging", session.callId);
         await chatChannel.watch();
         setChannel(chatChannel);
+        console.log("✅ Chat channel watched successfully");
       } catch (error) {
         toast.error("Failed to join video call");
-        console.error("Error init call", error);
+        console.error("❌ Error initializing call:", error);
+        console.error("Error details:", {
+          message: error?.message,
+          code: error?.code,
+          statusCode: error?.statusCode,
+        });
       } finally {
         setIsInitializingCall(false);
       }

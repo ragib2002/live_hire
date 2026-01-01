@@ -24,16 +24,40 @@ export async function createSession(req, res) {
       participants: participantIds
     });
 
-    // create stream video call
-    await streamClient.video.call("default", callId).getOrCreate({
-      data: {
-        created_by_id: clerkId,
-        custom: { problem, difficulty, sessionId: session._id.toString() },
-      },
-    });
+    try {
+      // create stream video call with recording enabled
+      const callResponse = await streamClient.video.call("default", callId).getOrCreate({
+        data: {
+          created_by_id: clerkId,
+          custom: { problem, difficulty, sessionId: session._id.toString() },
+          recording: {
+            mode: "available", // enables recording option
+          },
+        },
+      });
+      
+      console.log("✅ Stream call created successfully:", callId);
+      console.log("Call response:", callResponse);
+    } catch (streamError) {
+      console.error("⚠️ Warning: Error creating Stream call:", streamError.message);
+      console.error("Stream error details:", streamError);
+      // Continue even if Stream call creation fails - the session is already saved
+    }
 
-    // chat messaging - add all participants to channel members
-    const channelMembers = [clerkId];
+    // chat messaging - add host to channel members
+    try {
+      const channel = chatClient.channel("messaging", callId, {
+        name: `${problem} Session`,
+        created_by_id: clerkId,
+        members: [clerkId],
+      });
+
+      await channel.create();
+      console.log("✅ Chat channel created successfully:", callId);
+    } catch (chatError) {
+      console.error("⚠️ Warning: Error creating chat channel:", chatError.message);
+      // Continue even if chat creation fails
+    }
     
     res.status(201).json({ session });
   } catch (error) {
@@ -175,9 +199,13 @@ export async function endSession(req, res) {
       const call = streamClient.video.call("default", session.callId);
       const callState = await call.get();
       
+      console.log("📹 Call state before ending:", JSON.stringify(callState, null, 2));
+      
       // Check if there are any recordings
       if (callState?.call?.recording) {
         const recordings = callState.call.recording;
+        console.log("🎬 Recordings found:", recordings);
+        
         if (recordings && recordings.length > 0) {
           const latestRecording = recordings[recordings.length - 1];
           session.recording.recordingId = latestRecording.filename || null;
@@ -186,21 +214,25 @@ export async function endSession(req, res) {
             session.recording.recordingUrl = latestRecording.url;
           }
         }
+      } else {
+        console.log("ℹ️ No recording found in call state");
       }
 
       // delete stream video call
       await call.delete({ hard: true });
+      console.log("✅ Stream call deleted successfully");
     } catch (error) {
-      console.log("Warning: Error retrieving recording data:", error.message);
-      // Continue with session deletion even if recording retrieval fails
+      console.log("⚠️ Warning: Error retrieving/deleting call data:", error.message);
+      // Continue with session deletion even if call retrieval fails
     }
 
     // delete stream chat channel
     try {
       const channel = chatClient.channel("messaging", session.callId);
       await channel.delete();
+      console.log("✅ Chat channel deleted successfully");
     } catch (error) {
-      console.log("Warning: Error deleting channel:", error.message);
+      console.log("⚠️ Warning: Error deleting channel:", error.message);
     }
 
     session.status = "completed";
