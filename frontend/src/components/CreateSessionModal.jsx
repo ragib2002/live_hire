@@ -25,9 +25,10 @@ function CreateSessionModal({
           participants: participants.filter((id) => id !== userId),
         };
       } else {
+        // Only allow one participant
         return {
           ...prev,
-          participants: [...participants, userId],
+          participants: [userId],
         };
       }
     });
@@ -75,8 +76,8 @@ function CreateSessionModal({
           {/* PARTICIPANT SELECTION */}
           <div className="space-y-2">
             <label className="label">
-              <span className="label-text font-semibold">Select Participants</span>
-              <span className="label-text-alt text-info text-xs">Optional</span>
+              <span className="label-text font-semibold">Select Participant</span>
+              <span className="label-text-alt text-info text-xs">Select 1 person to join</span>
             </label>
 
             {loadingUsers ? (
@@ -137,12 +138,12 @@ function CreateSessionModal({
             <div className="alert alert-success">
               <Code2Icon className="size-5" />
               <div>
-                <p className="font-semibold">Room Summary:</p>
+                <p className="font-semibold">Session Summary:</p>
                 <p>
                   Problem: <span className="font-medium">{roomConfig.problem}</span>
                 </p>
                 <p>
-                  Participants: <span className="font-medium">{selectedParticipants.length}</span>
+                  Participant: <span className="font-medium">{selectedParticipants.length > 0 ? "1 invited" : "No participant selected (required)"}</span>
                 </p>
               </div>
             </div>
@@ -157,7 +158,7 @@ function CreateSessionModal({
           <button
             className="btn btn-primary gap-2"
             onClick={onCreateRoom}
-            disabled={isCreating || !roomConfig.problem}
+            disabled={isCreating || !roomConfig.problem || selectedParticipants.length === 0}
           >
             {isCreating ? (
               <LoaderIcon className="size-5 animate-spin" />

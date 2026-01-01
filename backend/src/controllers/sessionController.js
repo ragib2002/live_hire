@@ -12,6 +12,11 @@ export async function createSession(req, res) {
       return res.status(400).json({ message: "Problem and difficulty are required" });
     }
 
+    // Validate that exactly one participant is invited
+    if (participantIds.length !== 1) {
+      return res.status(400).json({ message: "One participant must be invited per session" });
+    }
+
     // generate a unique call id for stream video
     const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 

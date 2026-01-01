@@ -123,7 +123,7 @@ function SessionPage() {
                         )}
                         <p className="text-base-content/60 mt-2">
                           Host: {session?.host?.name || "Loading..."} •{" "}
-                          {(session?.participants?.length || 0) + 1}/{session?.participants?.length + 1 || 2} participants
+                          {1 + (session?.participants?.length || 0)} participant{1 + (session?.participants?.length || 0) > 1 ? "s" : ""}
                         </p>
                       </div>
 
