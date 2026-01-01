@@ -32,25 +32,6 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    // Recording details
-    recording: {
-      recordingId: {
-        type: String,
-        default: null,
-      },
-      recordingUrl: {
-        type: String,
-        default: null,
-      },
-      recordingStartTime: {
-        type: Date,
-        default: null,
-      },
-      recordingDuration: {
-        type: Number, // in seconds
-        default: 0,
-      },
-    },
   },
   { timestamps: true }
 );

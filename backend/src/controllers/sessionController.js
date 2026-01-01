@@ -197,32 +197,12 @@ export async function endSession(req, res) {
     // Try to get recording data before deleting the call
     try {
       const call = streamClient.video.call("default", session.callId);
-      const callState = await call.get();
       
-      console.log("📹 Call state before ending:", JSON.stringify(callState, null, 2));
-      
-      // Check if there are any recordings
-      if (callState?.call?.recording) {
-        const recordings = callState.call.recording;
-        console.log("🎬 Recordings found:", recordings);
-        
-        if (recordings && recordings.length > 0) {
-          const latestRecording = recordings[recordings.length - 1];
-          session.recording.recordingId = latestRecording.filename || null;
-          // The recording URL might be available in the response
-          if (latestRecording.url) {
-            session.recording.recordingUrl = latestRecording.url;
-          }
-        }
-      } else {
-        console.log("ℹ️ No recording found in call state");
-      }
-
       // delete stream video call
       await call.delete({ hard: true });
       console.log("✅ Stream call deleted successfully");
     } catch (error) {
-      console.log("⚠️ Warning: Error retrieving/deleting call data:", error.message);
+      console.log("⚠️ Warning: Error deleting call data:", error.message);
       // Continue with session deletion even if call retrieval fails
     }
 
@@ -257,31 +237,6 @@ export async function getUsers(req, res) {
     res.status(200).json({ users });
   } catch (error) {
     console.log("Error in getUsers controller:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-}
-
-export async function getSessionRecordings(req, res) {
-  try {
-    const userId = req.user._id;
-
-    // Get all completed sessions with recordings where user is host or participant
-    const sessions = await Session.find({
-      status: "completed",
-      $or: [
-        { host: userId },
-        { participants: userId }
-      ],
-      "recording.recordingUrl": { $ne: null }
-    })
-      .populate("host", "name profileImage email")
-      .populate("participants", "name profileImage email")
-      .sort({ updatedAt: -1 })
-      .limit(20);
-
-    res.status(200).json({ recordings: sessions });
-  } catch (error) {
-    console.log("Error in getSessionRecordings controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

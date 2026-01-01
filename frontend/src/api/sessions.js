@@ -20,11 +20,6 @@ export const sessionApi = {
     return response.data;
   },
 
-  getSessionRecordings: async () => {
-    const response = await axiosInstance.get("/sessions/recordings");
-    return response.data;
-  },
-
   getSessionById: async (id) => {
     const response = await axiosInstance.get(`/sessions/${id}`);
     return response.data;
