@@ -40,6 +40,15 @@ export const useGetUsers = () => {
   return result;
 };
 
+export const useSessionRecordings = () => {
+  const result = useQuery({
+    queryKey: ["sessionRecordings"],
+    queryFn: sessionApi.getSessionRecordings,
+  });
+
+  return result;
+};
+
 export const useSessionById = (id) => {
   const result = useQuery({
     queryKey: ["session", id],
