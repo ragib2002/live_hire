@@ -58,7 +58,7 @@ function VideoCallUI({ chatClient, channel }) {
         </div>
 
         <div className="bg-base-100 p-3 rounded-lg shadow flex justify-center">
-          <CallControls onLeave={() => navigate("/dashboard")} />
+          <CallControls onLeave={() => navigate("/dashboard")} disableRecordingButton />
         </div>
       </div>
 
