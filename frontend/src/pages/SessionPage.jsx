@@ -122,8 +122,7 @@ function SessionPage() {
                           <p className="text-base-content/60 mt-1">{problemData.category}</p>
                         )}
                         <p className="text-base-content/60 mt-2">
-                          Host: {session?.host?.name || "Loading..."} •{" "}
-                          {1 + (session?.participants?.length || 0)} participant{1 + (session?.participants?.length || 0) > 1 ? "s" : ""}
+                          Host: {session?.host?.name || "Loading..."}
                         </p>
                       </div>
 
