@@ -14,7 +14,7 @@ function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [roomConfig, setRoomConfig] = useState({ problem: "", difficulty: "" });
+  const [roomConfig, setRoomConfig] = useState({ problem: "", difficulty: "", participants: [] });
 
   const createSessionMutation = useCreateSession();
 
@@ -28,6 +28,7 @@ function DashboardPage() {
       {
         problem: roomConfig.problem,
         difficulty: roomConfig.difficulty.toLowerCase(),
+        participantIds: roomConfig.participants || [],
       },
       {
         onSuccess: (data) => {
@@ -44,7 +45,7 @@ function DashboardPage() {
   const isUserInSession = (session) => {
     if (!user.id) return false;
 
-    return session.host?.clerkId === user.id || session.participant?.clerkId === user.id;
+    return session.host?.clerkId === user.id || session.participants?.some(p => p?.clerkId === user.id);
   };
 
   return (

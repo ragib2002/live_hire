@@ -15,6 +15,11 @@ export const sessionApi = {
     return response.data;
   },
 
+  getUsers: async () => {
+    const response = await axiosInstance.get("/sessions/available-users");
+    return response.data;
+  },
+
   getSessionById: async (id) => {
     const response = await axiosInstance.get(`/sessions/${id}`);
     return response.data;

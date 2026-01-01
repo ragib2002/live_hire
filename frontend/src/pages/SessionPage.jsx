@@ -29,7 +29,7 @@ function SessionPage() {
 
   const session = sessionData?.session;
   const isHost = session?.host?.clerkId === user?.id;
-  const isParticipant = session?.participant?.clerkId === user?.id;
+  const isParticipant = session?.participants?.some(p => p?.clerkId === user?.id);
 
   const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
     session,
@@ -46,10 +46,14 @@ function SessionPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("javascript");
   const [code, setCode] = useState(problemData?.starterCode?.[selectedLanguage] || "");
 
-  // auto-join session if user is not already a participant and not the host
+  // auto-join session if user is invited but hasn't joined yet
   useEffect(() => {
     if (!session || !user || loadingSession) return;
     if (isHost || isParticipant) return;
+
+    // Check if user is invited
+    const isInvited = session.participants?.some(p => p._id === user.id || p?.clerkId === user.id);
+    if (!isInvited) return;
 
     joinSessionMutation.mutate(id, { onSuccess: refetch });
 
@@ -119,7 +123,7 @@ function SessionPage() {
                         )}
                         <p className="text-base-content/60 mt-2">
                           Host: {session?.host?.name || "Loading..."} •{" "}
-                          {session?.participant ? 2 : 1}/2 participants
+                          {(session?.participants?.length || 0) + 1}/{session?.participants?.length + 1 || 2} participants
                         </p>
                       </div>
 

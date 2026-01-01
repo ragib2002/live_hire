@@ -7,11 +7,13 @@ import {
   getMyRecentSessions,
   getSessionById,
   joinSession,
+  getUsers,
 } from "../controllers/sessionController.js";
 
 const router = express.Router();
 
 router.post("/", protectRoute, createSession);
+router.get("/available-users", protectRoute, getUsers);
 router.get("/active", protectRoute, getActiveSessions);
 router.get("/my-recent", protectRoute, getMyRecentSessions);
 
