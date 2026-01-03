@@ -26,7 +26,8 @@ export async function createSession(req, res) {
       difficulty, 
       host: userId, 
       callId,
-      participants: participantIds
+      participants: participantIds,
+      recordingEnabled: true,
     });
 
     try {
@@ -199,16 +200,23 @@ export async function endSession(req, res) {
       return res.status(400).json({ message: "Session is already completed" });
     }
 
-    // Try to get recording data before deleting the call
+    // Try to capture and store recording data before deleting the call
     try {
       const call = streamClient.video.call("default", session.callId);
+      const callState = await call.get();
       
-      // delete stream video call
-      await call.delete({ hard: true });
-      console.log("✅ Stream call deleted successfully");
+      // Check if there's a recording
+      if (callState.call && callState.call.recording) {
+        console.log("✅ Recording found for session:", session.callId);
+        // Recording will be retrieved via the API when user accesses recordings page
+      }
+      
+      // Note: We keep the call data for a period to allow recording retrieval
+      // Delete can be done later or via a cleanup job
+      console.log("✅ Call state retrieved successfully");
     } catch (error) {
-      console.log("⚠️ Warning: Error deleting call data:", error.message);
-      // Continue with session deletion even if call retrieval fails
+      console.log("⚠️ Warning: Error retrieving call data:", error.message);
+      // Continue with session completion even if call retrieval fails
     }
 
     // delete stream chat channel

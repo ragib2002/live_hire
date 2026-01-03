@@ -32,6 +32,17 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    // recording reference
+    recordings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Recording",
+      },
+    ],
+    recordingEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

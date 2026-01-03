@@ -1,6 +1,7 @@
-import { Code2, Clock, Users, Trophy, Loader } from "lucide-react";
+import { Code2, Clock, Users, Trophy, Loader, VideoIcon } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { Link } from "react-router";
 
 function RecentSessions({ sessions, isLoading }) {
   return (
@@ -78,9 +79,21 @@ function RecentSessions({ sessions, isLoading }) {
 
                   <div className="flex items-center justify-between pt-3 border-t border-base-300">
                     <span className="text-xs font-semibold opacity-80 uppercase">Completed</span>
-                    <span className="text-xs opacity-40">
-                      {new Date(session.updatedAt).toLocaleDateString()}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {session.recordingEnabled && (
+                        <Link
+                          to={`/recordings/${session._id}`}
+                          className="text-xs font-semibold text-primary hover:text-primary-dark flex items-center gap-1"
+                          title="View session recording"
+                        >
+                          <VideoIcon className="w-3.5 h-3.5" />
+                          Recording
+                        </Link>
+                      )}
+                      <span className="text-xs opacity-40">
+                        {new Date(session.updatedAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

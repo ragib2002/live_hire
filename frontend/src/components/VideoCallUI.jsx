@@ -3,21 +3,31 @@ import {
   CallingState,
   SpeakerLayout,
   useCallStateHooks,
+  useCall,
 } from "@stream-io/video-react-sdk";
-import { Loader2Icon, MessageSquareIcon, UsersIcon, XIcon } from "lucide-react";
-import { useState } from "react";
+import { Loader2Icon, MessageSquareIcon, UsersIcon, XIcon, VideoIcon } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Channel, Chat, MessageInput, MessageList, Thread, Window } from "stream-chat-react";
 
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import "stream-chat-react/dist/css/v2/index.css";
 
-function VideoCallUI({ chatClient, channel }) {
+function VideoCallUI({ chatClient, channel, sessionId }) {
   const navigate = useNavigate();
-  const { useCallCallingState, useParticipantCount } = useCallStateHooks();
+  const call = useCall();
+  const { useCallCallingState, useParticipantCount, useIsRecording } = useCallStateHooks();
   const callingState = useCallCallingState();
   const participantCount = useParticipantCount();
+  const isRecording = useIsRecording();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [recordingStatus, setRecordingStatus] = useState("not started");
+
+  useEffect(() => {
+    if (isRecording) {
+      setRecordingStatus("recording");
+    }
+  }, [isRecording]);
 
   if (callingState === CallingState.JOINING) {
     return (
@@ -33,13 +43,21 @@ function VideoCallUI({ chatClient, channel }) {
   return (
     <div className="h-full flex gap-3 relative str-video">
       <div className="flex-1 flex flex-col gap-3">
-        {/* Participants count badge and Chat Toggle */}
+        {/* Participants count badge, Recording Status and Chat Toggle */}
         <div className="flex items-center justify-between gap-2 bg-base-100 p-3 rounded-lg shadow">
-          <div className="flex items-center gap-2">
-            <UsersIcon className="w-5 h-5 text-primary" />
-            <span className="font-semibold">
-              {participantCount} {participantCount === 1 ? "participant" : "participants"}
-            </span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <UsersIcon className="w-5 h-5 text-primary" />
+              <span className="font-semibold">
+                {participantCount} {participantCount === 1 ? "participant" : "participants"}
+              </span>
+            </div>
+            {isRecording && (
+              <div className="flex items-center gap-2 bg-red-100 text-red-700 px-3 py-1 rounded-full">
+                <div className="w-2 h-2 bg-red-700 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold">Recording</span>
+              </div>
+            )}
           </div>
           {chatClient && channel && (
             <button
